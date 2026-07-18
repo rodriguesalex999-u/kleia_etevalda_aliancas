@@ -5618,7 +5618,7 @@ white-space: nowrap;
         height: 90vh;
         border-radius: 20px;
         padding: 0;
-        overflow: hidden;
+        overflow: auto;
         background: var(--white);
     }
 
@@ -5827,6 +5827,23 @@ white-space: nowrap;
     .modal-social-proof { margin: 15px 0; padding: 10px; }
     .modal-carousel-item { flex: 0 0 120px; }
     .modal-carousel-item img { height: 90px; }
+
+    /* MODAL CONTAINER - Mobile */
+    .modal-container {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        overflow-y: visible;
+    }
+
+    /* RECOMENDAÇÕES - Mobile */
+    .modal-recommendations {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 15px 12px !important;
+        border-top: 1px solid var(--border-subtle);
+    }
 
     .btn-add-cart-modal, .btn-whatsapp-modal, .btn-share, .btn-mercadopago-modal { padding: 10px 12px; font-size: 12px; }
     .modal-buttons-secondary .btn-add-cart-modal { font-size: 11px; padding: 8px 10px; }
