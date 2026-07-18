@@ -156,12 +156,9 @@ VERSÃO OTIMIZADA PARA COREWEBVITALS
 
 
 
-/* Prevenir scroll horizontal em todos os elementos */
-
-*, *::before, *::after {
-
-    overflow-x: hidden !important;
-
+/* Prevenir scroll horizontal - exceto containers de scroll */
+html, body {
+    overflow-x: hidden;
 }
 
 
@@ -1097,19 +1094,7 @@ button {
 4. HERO BANNER
 ======================================== */
 
-.hero-banner {
-
-    background: var(--white);
-
-    padding: var(--spacing-md) 0;
-
-}
-
-.hero-banner-xl {
-
-    padding: var(--spacing-xl) 0;
-
-}
+/* hero-banner antigo removido - usando o novo em style.css linha 7579 */
 
 .hero-image-container {
 
@@ -4118,19 +4103,35 @@ MODAL - SEÇÃO "COMPLEMENTE SEU ESTILO" (PRODUTOS COMPLEMENTARES)
 @media (min-width: 769px) {
 
     .upsell-products-row {
-
-        grid-template-columns: repeat(4, 1fr);
-
-        gap: 10px;
-
+        display: flex !important;
+        gap: 14px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none;
+        padding-bottom: 8px;
+        scroll-snap-type: x proximity;
     }
 
-    .complement-products-grid {
+    .upsell-product-card {
+        flex: 0 0 160px !important;
+        min-width: 160px;
+        scroll-snap-align: start;
+    }
 
-        grid-template-columns: repeat(4, 1fr);
+    .complement-products-scroll {
+        display: flex !important;
+        gap: 14px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none;
+        padding-bottom: 8px;
+        scroll-snap-type: x proximity;
+    }
 
-        gap: 10px;
-
+    .complement-product-card {
+        flex: 0 0 160px !important;
+        min-width: 160px;
+        scroll-snap-align: start;
     }
 
     .complement-product-image {
@@ -4195,6 +4196,11 @@ MODAL - SEÇÃO "COMPLEMENTE SEU ESTILO" (PRODUTOS COMPLEMENTARES)
 
     /* REMOVE AS BORDAS PRETAS LATERAIS NO CELULAR */
     .container-fluid {
+        padding: 0 !important;
+    }
+
+    .main-content {
+        min-height: auto !important;
         padding: 0 !important;
     }
 
@@ -5748,22 +5754,33 @@ white-space: nowrap;
         font-size: 0.9rem !important;
     }
 
-    /* Seções de recomendação dentro do modal */
+    /* Seções de recomendação dentro do modal - SCROLL HORIZONTAL */
     .upsell-products-row {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px;
+        display: flex !important;
+        gap: 10px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none;
+        padding-bottom: 8px;
     }
 
-    .complement-products-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px;
+    .upsell-product-card {
+        flex: 0 0 140px !important;
+        min-width: 140px;
     }
 
-    .upsell-product-card,
+    .complement-products-scroll {
+        display: flex !important;
+        gap: 10px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none;
+        padding-bottom: 8px;
+    }
+
     .complement-product-card {
-        margin-bottom: 8px;
+        flex: 0 0 140px !important;
+        min-width: 140px;
     }
 
     .upsell-product-name,
@@ -7544,35 +7561,43 @@ FEATURES ALIEXPRESS - Nível Internacional
 }
 
 /* ========================================
-HERBANNER - Foto/Vídeo por Categoria
+HERBANNER - Foto/Vídeo por Categoria (16:9 YouTube)
 ======================================== */
 
 .hero-banner {
     position: relative;
     width: 100%;
-    max-height: 400px;
+    aspect-ratio: 16 / 9;
+    max-height: 500px;
     overflow: hidden;
-    background: #000;
+    background: transparent;
+    display: block;
 }
 
 .hero-banner-media {
     width: 100%;
-    height: 400px;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #000;
 }
 
 .hero-banner-media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
+    display: block;
 }
 
 .hero-banner-media video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
+    display: block;
+    cursor: pointer;
 }
 
 .hero-banner-overlay {
@@ -7580,66 +7605,46 @@ HERBANNER - Foto/Vídeo por Categoria
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 40px 24px 24px;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+    padding: 60px 24px 24px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
     z-index: 2;
 }
 
 .hero-banner-title {
     font-family: var(--font-display);
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: #fff;
     margin-bottom: 6px;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
 }
 
 .hero-banner-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.8);
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 500;
-}
-
-/* Vídeo: cursor de play */
-.hero-banner-media video {
-    cursor: pointer;
-}
-
-/* Indicador de play/mute */
-.hero-banner-media video::after {
-    content: '🔊 Clique para ouvir';
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    pointer-events: none;
+    text-align: center;
 }
 
 /* Mobile */
 @media (max-width: 768px) {
     .hero-banner {
-        max-height: 220px;
-    }
-
-    .hero-banner-media {
-        height: 220px;
+        aspect-ratio: 16 / 9;
+        max-height: 250px;
     }
 
     .hero-banner-title {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
 
     .hero-banner-subtitle {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
 
     .hero-banner-overlay {
-        padding: 30px 16px 16px;
+        padding: 40px 16px 16px;
     }
 }
