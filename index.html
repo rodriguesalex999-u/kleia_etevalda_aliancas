@@ -132,6 +132,27 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .skeleton-title{height:14px;width:90%;}
 .skeleton-price{height:12px;width:50%;}
 @keyframes skeletonLoading{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.category-bar{background:var(--bg-page);border-bottom:1px solid var(--border-subtle);padding:10px 0;overflow:hidden;}
+.category-bar-inner{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:0 12px;}
+.category-bar-inner::-webkit-scrollbar{display:none;}
+.category-pill{flex-shrink:0;padding:8px 18px;border-radius:var(--radius-full);border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--gray-medium);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .25s ease;white-space:nowrap;}
+.category-pill:hover{border-color:var(--gold-primary);color:var(--gold-primary);}
+.category-pill.active{background:var(--gold-primary);color:var(--white);border-color:var(--gold-primary);font-weight:600;box-shadow:0 2px 10px rgba(212,175,55,.3);}
+.trust-bar{display:flex;justify-content:center;gap:16px;padding:8px 12px;background:rgba(212,175,55,.08);border-bottom:1px solid rgba(212,175,55,.15);flex-wrap:wrap;}
+.trust-bar-item{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:600;color:var(--gold-primary);white-space:nowrap;}
+.trust-bar-item i{font-size:.75rem;}
+.cursor-glow{position:fixed;width:350px;height:350px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(212,175,55,.10),transparent 70%);filter:blur(25px);transform:translate(-50%,-50%);z-index:0;opacity:0;transition:opacity .3s ease;}
+.cursor-glow.active{opacity:1;}
+header.scrolled{backdrop-filter:blur(24px) saturate(160%)!important;-webkit-backdrop-filter:blur(24px) saturate(160%)!important;background:rgba(10,10,10,.88)!important;border-bottom:1px solid rgba(212,175,55,.18)!important;box-shadow:0 15px 40px rgba(0,0,0,.5)!important;}
+header.scrolled .header-top{padding:4px 0!important;}
+.back-to-top{position:fixed;bottom:90px;right:20px;width:44px;height:44px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-subtle);color:var(--gold-primary);font-size:1.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(20px);transition:all .3s ease;z-index:9998;pointer-events:none;box-shadow:0 4px 15px rgba(0,0,0,.3);}
+.back-to-top.visible{opacity:1;transform:translateY(0);pointer-events:auto;}
+.back-to-top:hover{background:var(--gold-primary);color:var(--white);border-color:var(--gold-primary);}
+.reveal{opacity:0;transform:translateY(35px);transition:.8s cubic-bezier(.2,.8,.2,1);}
+.reveal.show{opacity:1;transform:none;}
+.scroll-progress{position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,#7d5b08,#D4AF37,#fff2b0,#D4AF37,#7d5b08);background-size:200% 100%;animation:goldFlow 3s linear infinite;z-index:10001;transition:width .1s linear;box-shadow:0 0 10px rgba(212,175,55,.5);}
+@keyframes goldFlow{from{background-position:0%}to{background-position:300%}}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
     </style>
 
     <!-- style.css: carregamento assíncrono -->
@@ -142,6 +163,18 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
     <meta name="apple-mobile-web-app-title" content="Etevalda MT">
 </head>
 <body>
+
+    <!-- SCROLL PROGRESS -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- CURSOR GLOW -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- COOKIE CONSENT - LGPD -->
+    <div id="cookieConsent" style="position:fixed;bottom:0;left:0;right:0;background:rgba(17,17,17,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.3);padding:16px 20px;z-index:99999;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;animation:slideUp 0.5s ease;">
+        <p style="color:#ccc;font-size:0.82rem;margin:0;max-width:600px;line-height:1.5;">Este site usa cookies para melhorar sua experiência de compra. Ao continuar navegando, você aceita nossa <a href="#" style="color:var(--gold-primary);text-decoration:underline;">política de privacidade</a>.</p>
+        <button onclick="acceptCookies()" style="background:var(--gold-primary);color:#fff;border:none;padding:10px 24px;border-radius:25px;font-weight:600;font-size:0.82rem;cursor:pointer;white-space:nowrap;transition:all 0.3s ease;">Aceitar e Continuar</button>
+    </div>
 
     <div id="geoNotification" class="geo-notification"><div class="geo-notif-icon"><i class="fas fa-map-marker-alt"></i></div><div class="geo-notif-text" id="geoNotificationText"></div><div class="geo-notif-bar" id="geoNotifBar"></div></div>
     <div id="visitNotification" class="visit-notification"><div class="visit-notif-icon"><i class="fas fa-history"></i></div><div class="visit-notif-text" id="visitNotificationText"></div><div class="visit-notif-bar" id="visitNotifBar"></div></div>
@@ -211,6 +244,23 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
     </header>
 
     <main class="main-content">
+        <!-- HERO BANNER - Foto ou Vídeo por categoria -->
+        <div class="hero-banner" id="heroBanner" style="display:none;">
+            <div class="hero-banner-media" id="heroBannerMedia"></div>
+            <div class="hero-banner-overlay">
+                <h2 class="hero-banner-title" id="heroBannerTitle"></h2>
+                <p class="hero-banner-subtitle" id="heroBannerSubtitle"></p>
+            </div>
+        </div>
+
+        <!-- TRUST BAR -->
+        <div class="trust-bar">
+            <div class="trust-bar-item"><i class="fas fa-shield-alt"></i> Compra Segura</div>
+            <div class="trust-bar-item"><i class="fas fa-truck"></i> Entrega Rapida</div>
+            <div class="trust-bar-item"><i class="fas fa-money-bill-wave"></i> Pague na Entrega</div>
+            <div class="trust-bar-item"><i class="fas fa-headset"></i> Suporte WhatsApp</div>
+        </div>
+
         <div class="container-fluid">
             <!-- VITRINE -->
             <section class="products-section">
@@ -368,6 +418,228 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
             <script>window.process = window.process || { env: {} };</script>
             <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
+
+            <!-- PREMIUM LUXURY JS -->
+            <script>
+            (function() {
+                'use strict';
+
+                // COOKIE CONSENT
+                if (!localStorage.getItem('cookiesAccepted')) {
+                    document.getElementById('cookieConsent').style.display = 'flex';
+                } else {
+                    var cc = document.getElementById('cookieConsent');
+                    if (cc) cc.style.display = 'none';
+                }
+
+                // SCROLL PROGRESS BAR
+                var progressBar = document.getElementById('scrollProgress');
+                if (progressBar) {
+                    window.addEventListener('scroll', function() {
+                        var scrollTop = document.documentElement.scrollTop;
+                        var scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                        progressBar.style.width = (scrollTop / scrollHeight) * 100 + '%';
+                    }, { passive: true });
+                }
+
+                // CURSOR GLOW
+                var glow = document.getElementById('cursorGlow');
+                if (glow) {
+                    var glowActive = false;
+                    document.addEventListener('mousemove', function(e) {
+                        glow.style.left = e.clientX + 'px';
+                        glow.style.top = e.clientY + 'px';
+                        if (!glowActive) { glowActive = true; glow.classList.add('active'); }
+                    });
+                    document.addEventListener('mouseleave', function() {
+                        glow.classList.remove('active');
+                        glowActive = false;
+                    });
+                }
+
+                // 3D CARD TILT
+                function initCardTilt() {
+                    document.querySelectorAll('.product-card:not(.skeleton)').forEach(function(card) {
+                        if (card._tiltInit) return;
+                        card._tiltInit = true;
+                        card.addEventListener('mousemove', function(e) {
+                            var r = card.getBoundingClientRect();
+                            var x = e.clientX - r.left;
+                            var y = e.clientY - r.top;
+                            card.style.transform = 'perspective(900px) rotateX(' + ((0.5 - y / r.height) * 10) + 'deg) rotateY(' + ((x / r.width - 0.5) * 10) + 'deg) translateY(-6px)';
+                        });
+                        card.addEventListener('mouseleave', function() { card.style.transform = ''; });
+                    });
+                }
+                initCardTilt();
+                var tiltObs = new MutationObserver(initCardTilt);
+                var grid = document.getElementById('productsContainer');
+                if (grid) tiltObs.observe(grid, { childList: true });
+
+                // HEADER SCROLLED
+                var header = document.querySelector('header');
+                if (header) {
+                    window.addEventListener('scroll', function() {
+                        header.classList.toggle('scrolled', window.scrollY > 40);
+                    }, { passive: true });
+                }
+
+                // SCROLL REVEAL
+                var revealObs = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) { entry.target.classList.add('show'); revealObs.unobserve(entry.target); }
+                    });
+                }, { threshold: 0.15 });
+                document.querySelectorAll('.reveal').forEach(function(el) { revealObs.observe(el); });
+
+                // BACK TO TOP
+                var backBtn = document.createElement('button');
+                backBtn.className = 'back-to-top';
+                backBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                backBtn.setAttribute('aria-label', 'Voltar ao topo');
+                backBtn.onclick = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+                document.body.appendChild(backBtn);
+                window.addEventListener('scroll', function() {
+                    backBtn.classList.toggle('visible', window.scrollY > 500);
+                }, { passive: true });
+
+                // ========================================
+                // HERO BANNER INTELIGENTE
+                // ========================================
+                var heroBanner = document.getElementById('heroBanner');
+                var heroMedia = document.getElementById('heroBannerMedia');
+                var heroTitle = document.getElementById('heroBannerTitle');
+                var heroSubtitle = document.getElementById('heroBannerSubtitle');
+                var currentHeroVideo = null;
+
+                function isVideoUrl(url) {
+                    if (!url) return false;
+                    var lower = url.toLowerCase();
+                    return /\.(mp4|webm|mov|avi)(\?|$)/i.test(lower) ||
+                           /youtu(\.be\/|be\.com\/)/i.test(lower) ||
+                           /vimeo\.com\//i.test(lower);
+                }
+
+                function getVideoEmbedUrl(url) {
+                    var lower = url.toLowerCase();
+                    var ytMatch = lower.match(/youtu\.be\/([^&?/]+)/i) ||
+                                  lower.match(/youtube\.com\/watch\?v=([^&]+)/i) ||
+                                  lower.match(/youtube\.com\/shorts\/([^&?/]+)/i);
+                    if (ytMatch) {
+                        return 'https://www.youtube.com/embed/' + ytMatch[1] + '?autoplay=1&mute=1&loop=1&playlist=' + ytMatch[1] + '&controls=0&modestbranding=1&rel=0';
+                    }
+                    var vimeoMatch = lower.match(/vimeo\.com\/(\d+)/i);
+                    if (vimeoMatch) {
+                        return 'https://player.vimeo.com/video/' + vimeoMatch[1] + '?autoplay=1&muted=1&loop=1';
+                    }
+                    return url;
+                }
+
+                function renderHeroBanner(bannerUrl, title, subtitle) {
+                    if (!bannerUrl) {
+                        heroBanner.style.display = 'none';
+                        return;
+                    }
+
+                    heroBanner.style.display = 'block';
+                    heroTitle.textContent = title || '';
+                    heroSubtitle.textContent = subtitle || '';
+
+                    if (isVideoUrl(bannerUrl)) {
+                        var embedUrl = getVideoEmbedUrl(bannerUrl);
+                        var isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(bannerUrl);
+
+                        if (isDirectVideo) {
+                            heroMedia.innerHTML = '<video src="' + bannerUrl + '" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;cursor:pointer;" id="heroVideo"></video>';
+                            currentHeroVideo = document.getElementById('heroVideo');
+
+                            // Click: pausa, reinicia do início, tira mute
+                            currentHeroVideo.addEventListener('click', function() {
+                                this.currentTime = 0;
+                                this.muted = false;
+                                this.play();
+                            });
+                        } else {
+                            // YouTube/Vimeo: iframe
+                            heroMedia.innerHTML = '<iframe src="' + embedUrl + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>';
+                        }
+                    } else {
+                        // Imagem
+                        heroMedia.innerHTML = '<img src="' + bannerUrl + '" alt="' + (title || '') + '" loading="eager">';
+                    }
+                }
+
+                // Observer: pausa vídeo quando sai da tela
+                if (window.IntersectionObserver) {
+                    var heroObserver = new IntersectionObserver(function(entries) {
+                        entries.forEach(function(entry) {
+                            if (currentHeroVideo) {
+                                if (entry.isIntersecting) {
+                                    currentHeroVideo.play().catch(function() {});
+                                } else {
+                                    currentHeroVideo.pause();
+                                }
+                            }
+                        });
+                    }, { threshold: 0.3 });
+
+                    if (heroBanner) {
+                        heroObserver.observe(heroBanner);
+                    }
+                }
+
+                // Carregar banner da categoria atual
+                function loadHeroBanner() {
+                    if (typeof categories === 'undefined' || !categories) return;
+
+                    var hash = window.location.hash.slice(1);
+                    var currentCat = hash && hash !== 'all' ? hash : null;
+
+                    // Procurar banner específico da categoria
+                    var catBanner = null;
+                    var allCategoryBanner = null;
+
+                    categories.forEach(function(cat) {
+                        var slug = (cat.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+                        if (cat.banner_all) {
+                            allCategoryBanner = cat;
+                        }
+                        if (currentCat && slug === currentCat) {
+                            catBanner = cat;
+                        }
+                    });
+
+                    // Prioridade: banner da categoria > banner global > nenhum
+                    var banner = catBanner || allCategoryBanner;
+
+                    if (banner && banner.banner_url) {
+                        renderHeroBanner(banner.banner_url, banner.hero_title, banner.hero_subtitle);
+                    } else {
+                        heroBanner.style.display = 'none';
+                    }
+                }
+
+                // Observer pra categories (espera carregar)
+                var _origLoadCategories = window.loadCategories;
+                if (typeof _origLoadCategories === 'function') {
+                    window.loadCategories = function() {
+                        return _origLoadCategories.apply(this, arguments).then(function() {
+                            loadHeroBanner();
+                        });
+                    };
+                } else {
+                    // Fallback: tenta carregar após 2s
+                    setTimeout(loadHeroBanner, 2000);
+                }
+
+                // Recarregar ao mudar de categoria
+                window.addEventListener('hashchange', function() {
+                    setTimeout(loadHeroBanner, 300);
+                });
+
+            })();
+            </script>
+
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
         </div>
     </main>
@@ -549,6 +821,11 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function(err) {
         console.warn('SW registration failed:', err);
     });
+}
+function acceptCookies() {
+    localStorage.setItem('cookiesAccepted', 'true');
+    var cc = document.getElementById('cookieConsent');
+    if (cc) { cc.style.transform = 'translateY(100%)'; cc.style.opacity = '0'; setTimeout(function(){ cc.style.display = 'none'; }, 400); }
 }
 </script>
 </body>
