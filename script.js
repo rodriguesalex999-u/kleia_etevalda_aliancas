@@ -387,7 +387,7 @@ async function loadTeamCarousel() {
 }
 
 // 4. FUNÇÕES DE RENDERIZAÇÃO — LAZY LOADING (renderiza só o que cabe na tela)
-const PRODUCTS_PER_PAGE = 24;
+const PRODUCTS_PER_PAGE = 12;
 let _filteredProducts = [];
 let _renderedCount = 0;
 let _lazyObserver = null;
@@ -2340,16 +2340,13 @@ function showToast(message) {
 }
 
 function _proceedToWhatsApp(hasProduct) {
-    const knownCity = _getKnownCity();
-    if (knownCity) {
-        if (hasProduct) {
-            sendWhatsAppMessage(window.currentWhatsAppProduct, knownCity);
-        } else {
-            sendWhatsAppMessage(null, knownCity);
-        }
-        return;
+    // Vai direto pro WhatsApp — sem modal de cidade
+    const knownCity = _getKnownCity() || detectedLocation.city || '';
+    if (hasProduct) {
+        sendWhatsAppMessage(window.currentWhatsAppProduct, knownCity);
+    } else {
+        sendWhatsAppMessage(null, knownCity);
     }
-    showCityConfirmModal();
 }
 
 function handleFloatingWhatsApp() {
@@ -2394,13 +2391,14 @@ function _getGreetingAndCity(input) {
     return { greeting: 'Olá', city: input.trim() || 'minha cidade' };
 }
 
-// Função para enviar a mensagem do WhatsApp
+// Função para enviar a mensagem do WhatsApp (sem necessidade de cidade do cliente)
 function sendWhatsAppMessage(product, city) {
-    const { greeting, city: normalizedCity } = _getGreetingAndCity(city);
+    const cityInfo = city ? _getGreetingAndCity(city) : { greeting: 'Olá', city: '' };
+    const { greeting } = cityInfo;
 
     let msg;
     if (!product) {
-        msg = `${greeting}, sou de ${normalizedCity}, vi seus produtos no site e gostei muito. Como funciona a entrega hoje?`;
+        msg = `${greeting}, vi seus produtos no site e gostei muito. Como funciona a entrega?`;
     } else {
         let extras = '';
         let totalExtra = 0;
@@ -2424,9 +2422,9 @@ function sendWhatsAppMessage(product, city) {
 
         if (extras) {
             const total = product.price + totalExtra;
-            msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}*${extras} - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+            msg = `${greeting}, gostei do produto: *${product.name}*${extras} - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar?`;
         } else {
-            msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+            msg = `${greeting}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar?`;
         }
     }
 
@@ -2441,78 +2439,7 @@ function sendWhatsAppMessage(product, city) {
     window.open(`https://api.whatsapp.com/send/?phone=5565993475496&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// Função para mostrar o modal de cidade (campo de texto livre)
-function showCityConfirmModal() {
-    const modal = document.getElementById('cityConfirmModal');
-    const cityTextInput = document.getElementById('cityTextInput');
-    
-    if (cityTextInput) {
-        // Pré-preenche com sugestão do IP (cidade detectada mas não confirmada)
-        cityTextInput.value = window.detectedCitySuggestion || '';
-    }
-    
-    if (modal) {
-        modal.style.display = 'flex';
-        window._cityModalOpenTime = Date.now();
-        setTimeout(() => { if (cityTextInput) cityTextInput.focus(); }, 100);
-    }
-    
-    setupCityModalButtons();
-}
-
-// Configura o botão "Ir para o WhatsApp" do modal de cidade
-function setupCityModalButtons() {
-    const saveCityBtn = document.getElementById('saveCityBtn');
-    const modal = document.getElementById('cityConfirmModal');
-    const cityTextInput = document.getElementById('cityTextInput');
-    
-    if (!saveCityBtn) return;
-    
-    const newSaveBtn = saveCityBtn.cloneNode(true);
-    saveCityBtn.parentNode.replaceChild(newSaveBtn, saveCityBtn);
-    
-    const doSend = () => {
-        const cityTextEl = document.getElementById('cityTextInput');
-        const chosenCity = cityTextEl ? cityTextEl.value.trim() : '';
-        if (!chosenCity) {
-            cityTextEl && (cityTextEl.style.borderColor = '#e53e3e');
-            setTimeout(() => { if (cityTextEl) cityTextEl.style.borderColor = 'var(--gold-primary)'; }, 1500);
-            return;
-        }
-        localStorage.setItem('user_city', chosenCity);
-        detectedLocation.city = chosenCity;
-        if (modal) modal.style.display = 'none';
-        // Sempre chama sendWhatsAppMessage; produto null = botão flutuante
-        sendWhatsAppMessage(window.currentWhatsAppProduct ?? null, chosenCity);
-    };
-    
-    newSaveBtn.addEventListener('click', doSend);
-    
-    // Permitir Enter no campo de texto
-    const newInput = document.getElementById('cityTextInput');
-    if (newInput) {
-        newInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSend(); });
-    }
-}
-
-// Função para fechar o modal (opcional)
-function closeCityModal() {
-    const modal = document.getElementById('cityConfirmModal');
-    if (modal) modal.style.display = 'none';
-}
-
-// Adicionar evento para fechar ao clicar fora
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('cityConfirmModal');
-    if (modal && modal.style.display === 'flex') {
-        // Ignorar o mesmo click que abriu o modal (evita fechar imediatamente por bubbling)
-        if (window._cityModalOpenTime && Date.now() - window._cityModalOpenTime < 300) return;
-        const modalContent = modal.querySelector('div > div');
-        if (modalContent && !modalContent.contains(e.target) && !e.target.closest('#cityConfirmModal div')) {
-            modal.style.display = 'none';
-        }
-    }
-});
+// Modal de cidade removido — WhatsApp agora vai direto
 
 let _activeFaqAudio = null;
 let _activeFaqCard  = null;
@@ -3581,8 +3508,6 @@ window.changeZoom = changeZoom;
 window.changeModalMedia = changeModalMedia;
 window.shareProduct = shareProduct;
 
-// Exportar funções para uso global (localização)
+// Exportar funções para uso global
 window.handleFloatingWhatsApp = handleFloatingWhatsApp;
 window.sendWhatsAppMessage = sendWhatsAppMessage;
-window.showCityConfirmModal = showCityConfirmModal;
-window.closeCityModal = closeCityModal;
